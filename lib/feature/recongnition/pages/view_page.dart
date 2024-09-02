@@ -1,8 +1,11 @@
+import 'dart:ffi';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -18,9 +21,13 @@ class _ScreenMainState extends State<ScreenMain> {
   File? image;
   late Interpreter interpreter;
   List<dynamic>? _recognitions;
+  List<String> _loadLabels = [];
+  List<double> _output = [];
+  double? maxProb = 0;
   @override
   void initState() {
     loadModel();
+
     super.initState();
   }
 
@@ -58,20 +65,48 @@ class _ScreenMainState extends State<ScreenMain> {
     interpreter = await Interpreter.fromAsset('assets/model_unquant.tflite');
   }
 
+  Future<List<String>> loadLabels() async {
+    final labelsTxt = await rootBundle.loadString('assets/labels.txt');
+    return labelsTxt.split('\n');
+  }
+
   void loadModelImage(File image) async {
     final Uint8List imageBytes = await image.readAsBytes();
     final imgTensor = _preprocessImage(imageBytes);
-    //List<Float32List> input = [imageBytes.buffer.asFloat32List()];
-    var output = List.filled(1 * 2, 0).reshape([1, 2]);
 
+    var output = List.filled(1 * 2, 0).reshape([1, 2]);
+    _loadLabels = await loadLabels();
     interpreter.run(imgTensor, output);
-    print(output);
-    // Return the output
-    return output[0];
+    _output = output[0];
+    setState(() {
+      maxProb = getMax(_output);
+    });
+
+    // return output[0];
+  }
+
+  double getMax(List<double> output) {
+    if (output.isEmpty) {
+      return 0.5;
+    }
+    return output.reduce((value, element) {
+      if (value > element) {
+        element = value;
+        return element;
+      } else {
+        return element;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(_loadLabels.toString());
+    debugPrint(_output.toString());
+    debugPrint(_loadLabels[_output.indexOf(getMax(_output))]
+        .split(' ')
+        .last
+        .toString());
     return Scaffold(
       appBar: AppBar(),
       body: Container(
@@ -94,7 +129,7 @@ class _ScreenMainState extends State<ScreenMain> {
                           borderRadius: BorderRadius.circular(10),
                           child: Image.file(
                             image!,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
