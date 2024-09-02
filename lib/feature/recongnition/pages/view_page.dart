@@ -6,6 +6,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/core/app_palette.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -20,7 +21,7 @@ class ScreenMain extends StatefulWidget {
 class _ScreenMainState extends State<ScreenMain> {
   File? image;
   late Interpreter interpreter;
-  List<dynamic>? _recognitions;
+  String? _recognition;
   List<String> _loadLabels = [];
   List<double> _output = [];
   double? maxProb = 0;
@@ -78,9 +79,10 @@ class _ScreenMainState extends State<ScreenMain> {
     _loadLabels = await loadLabels();
     interpreter.run(imgTensor, output);
     _output = output[0];
-    setState(() {
-      maxProb = getMax(_output);
-    });
+    maxProb = getMax(_output);
+    final int index = _output.indexOf(getMax(_output));
+    _recognition = _loadLabels[index].split(' ').last;
+    setState(() {});
 
     // return output[0];
   }
@@ -103,36 +105,58 @@ class _ScreenMainState extends State<ScreenMain> {
   Widget build(BuildContext context) {
     debugPrint(_loadLabels.toString());
     debugPrint(_output.toString());
-    debugPrint(_loadLabels[_output.indexOf(getMax(_output))]
+    /* debugPrint(_loadLabels[_output.indexOf(getMax(_output))]
         .split(' ')
         .last
-        .toString());
+        .toString()); */
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: AppPallete.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: AppPallete.backgroundColor,
+        title: Text(
+          'Select Your Object',
+          style: TextStyle(
+              color: AppPallete.whiteColor,
+              fontSize: 24,
+              fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+      ),
       body: Container(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                height: 100,
-                width: double.infinity,
-                child: Image.asset('assets/1B.png'),
+              SizedBox(
+                height: 20,
               ),
-              Text('data'),
               image != null
-                  ? GestureDetector(
-                      onTap: imageSelect,
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 150,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.file(
-                            image!,
-                            fit: BoxFit.contain,
+                  ? Column(
+                      children: [
+                        GestureDetector(
+                          onTap: imageSelect,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 150,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                image!,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          'It points to $_recognition',
+                          style: TextStyle(
+                              color: AppPallete.whiteColor,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500),
+                        )
+                      ],
                     )
                   : GestureDetector(
                       onTap: () {
@@ -161,7 +185,8 @@ class _ScreenMainState extends State<ScreenMain> {
                               ),
                               Text(
                                 'Select your image',
-                                style: TextStyle(fontSize: 15),
+                                style: TextStyle(
+                                    fontSize: 15, color: AppPallete.whiteColor),
                               )
                             ],
                           ),
