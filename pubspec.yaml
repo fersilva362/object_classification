@@ -38,6 +38,7 @@ dependencies:
   tflite_flutter: ^0.10.4
   dotted_border: ^2.1.0
   image: ^4.2.0
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
