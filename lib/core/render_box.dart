@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/core/model.dart';
+import 'package:flutter_application_1/feature/recongnition/models/model.dart';
 
 Widget renderBoxesOnImage(File image, List<Prediction?> recognitions,
     {Color? boxesColor, bool showPercentage = true}) {
@@ -56,7 +56,7 @@ Widget renderBoxesOnImage(File image, List<Prediction?> recognitions,
                   height: 20,
                   alignment: Alignment.centerRight,
                   color: usedColor,
-                  child: Text('text'
+                  child: const Text('text'
                       /* "${re.className ?? re.classIndex.toString()}_${showPercentage ? "${(re.score * 100).toStringAsFixed(2)}%" : ""}",
                      */
                       ),

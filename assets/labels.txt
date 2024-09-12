@@ -1,2 +1,2 @@
-0 right
-1 left
+0 person and helmet
+1 persons
