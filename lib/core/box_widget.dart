@@ -18,27 +18,9 @@ class BoxWidget extends StatelessWidget {
       required this.correctionX});
   @override
   Widget build(BuildContext context) {
-    // Color for bounding box
-    //print(MediaQuery.of(context).size);
-    Color? usedColor;
-
-    if (boxesColor == null) {
-      //change colors for each label
-      usedColor = Colors
-              .yellow /*Colors.primaries[ 
-           ((result.className ?? result.classIndex.toString()).length +
-                  (result.className ?? result.classIndex.toString())
-                      .codeUnitAt(0) +
-                  result.classIndex) %
-              Colors.primaries.length ]*/
-          ;
-    } else {
-      usedColor = boxesColor;
-    }
-
     return Positioned(
-      left: result.x * correctionX - 30,
-      top: result.y * correctionY - 70,
+      left: (result.x - result.width / 2) * correctionX,
+      top: (result.y - result.height / 2) * correctionY,
       child: Container(
         width: result.width * correctionX,
         height: result.height * correctionY,
@@ -50,13 +32,13 @@ class BoxWidget extends StatelessWidget {
           alignment: Alignment.topLeft,
           child: Container(
             color: Colors.primaries[result.classId],
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(
-                  (result.classObj),
-                ),
-                Text(" ${result.confidence.toStringAsFixed(2)}")
+                Text('d'
+                    //(result.classObj),
+                    ),
+                //Text(" ${result.confidence.toStringAsFixed(2)}")
               ],
             ),
           ),

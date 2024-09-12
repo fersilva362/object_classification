@@ -72,7 +72,7 @@ Widget renderBoxesOnImage(File image, List<Prediction?> recognitions,
               ],
             ),
           );
-        }).toList()
+        })
       ],
     );
   });

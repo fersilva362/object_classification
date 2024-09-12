@@ -11,7 +11,6 @@ Widget boundingBoxes2(
     children: results
         .map((e) => BoxWidget(
               result: e,
-              //myKey: GlobalKey(),
               correctionY: correctionY,
               correctionX: correctionX,
             ))
