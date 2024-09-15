@@ -32,13 +32,12 @@ class BoxWidget extends StatelessWidget {
           alignment: Alignment.topLeft,
           child: Container(
             color: Colors.primaries[result.classId],
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text('d'
-                    //(result.classObj),
-                    ),
-                //Text(" ${result.confidence.toStringAsFixed(2)}")
+                Text(
+                  result.classId.toString(),
+                ),
               ],
             ),
           ),

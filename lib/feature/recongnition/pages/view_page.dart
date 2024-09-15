@@ -1,11 +1,12 @@
 import 'dart:convert';
+
+import 'package:flutter_application_1/core/card_tile.dart';
 import 'package:flutter_application_1/core/roboflow_object_detection.dart';
 import 'package:flutter_application_1/core/tensor_flow.dart';
 import 'package:flutter_application_1/feature/recongnition/models/model.dart';
 import 'package:flutter_application_1/core/stack_box.dart';
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/core/app_palette.dart';
@@ -30,6 +31,8 @@ class _ScreenMainState extends State<ScreenMain> {
   String base64String = '';
   bool isTFactive = false;
   bool isRoboFloActive = false;
+  Map bag = {};
+  List filter = [];
 
   double maxProb = 0;
 
@@ -87,6 +90,16 @@ class _ScreenMainState extends State<ScreenMain> {
     if (isRoboFloActive) {
       predicitonsList = [];
       predicitonsList = await detectObjects(image, sizeImage);
+      bag = {};
+
+      for (var i = 0; i < predicitonsList.length; i++) {
+        bag.containsKey(predicitonsList[i].classObj)
+            ? bag.update(predicitonsList[i].classObj, (value) => value + 1)
+            : bag.putIfAbsent(predicitonsList[i].classObj, () => 1);
+      }
+      /* predicitonsList.forEach((e) => bag.containsKey(e.classObj)
+          ? bag.update(e.classObj, (value) => value + 1)
+          : bag.putIfAbsent(e.classObj, () => 1)) */
     }
 
     setState(() {});
@@ -104,11 +117,10 @@ class _ScreenMainState extends State<ScreenMain> {
     double correctionY = (sizeImage['height'] != 0)
         ? heightBox / sizeImage['height']!.toInt()
         : 1;
-    debugPrint('reco: ${_recognition.toString()}');
-
     return Scaffold(
       backgroundColor: AppPallete.backgroundColor,
       appBar: AppBar(
+        elevation: 1,
         backgroundColor: AppPallete.backgroundColor,
         title: const Text(
           'Select Your Object',
@@ -131,8 +143,7 @@ class _ScreenMainState extends State<ScreenMain> {
                     children: [
                       GestureDetector(
                         onTap: imageSelect,
-                        child: Container(
-                          color: Colors.blue,
+                        child: SizedBox(
                           width: double.infinity,
                           height: 250,
                           child: Stack(children: [
@@ -143,8 +154,9 @@ class _ScreenMainState extends State<ScreenMain> {
                                 key: myKey,
                                 borderRadius: BorderRadius.circular(10),
                                 child: Image.file(
-                                  // heightBox,
+                                  height: 250,
                                   image!,
+                                  fit: BoxFit.fill,
                                 ),
                               ),
                             ),
@@ -156,7 +168,7 @@ class _ScreenMainState extends State<ScreenMain> {
                         ),
                       ),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       /* const Text(
                         'label: {predicitonsList[0].classObj} with {(predicitonsList[0].confidence * 100).toStringAsFixed(1)} % confidence',
@@ -204,40 +216,91 @@ class _ScreenMainState extends State<ScreenMain> {
                     ),
                   ),
             const SizedBox(
-              height: 20,
+              height: 5,
             ),
             TextButton(
-                onPressed: () => {
-                      isTFactive = true,
-                      loadModelImage(image!, isTFactive = isTFactive,
-                          isRoboFloActive = isRoboFloActive),
-                    },
-                child: const Text('TensorFlow')),
+              onPressed: () => {
+                isTFactive = true,
+                loadModelImage(image!, isTFactive = isTFactive,
+                    isRoboFloActive = isRoboFloActive),
+              },
+              child: const Text(
+                'Image Recognition',
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.lightBlue,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
             isTFactive
-                ? Text(
-                    'Inference by Tensor is $_recognition',
-                    style: const TextStyle(
-                        color: AppPallete.whiteColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500),
+                ? SizedBox(
+                    height: 70,
+                    width: double.maxFinite,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Inference by TensorFlowFlite:',
+                          style: TextStyle(
+                              color: AppPallete.whiteColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            _recognition,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 : const SizedBox.shrink(),
             TextButton(
                 onPressed: () async => {
+                      isRoboFloActive = true,
                       loadModelImage(image!, isTFactive = isTFactive,
-                          isRoboFloActive = true),
-                      setState(() {
-                        isRoboFloActive = false;
-                      })
+                          isRoboFloActive = isRoboFloActive),
                     },
-                child: const Text('RoboFlow')),
+                child: const Text(
+                  'Object Detection',
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.lightBlue,
+                      fontWeight: FontWeight.w600),
+                )),
             isRoboFloActive
-                ? Text(
-                    'Inference by roboflow is these: ---',
-                    style: const TextStyle(
-                        color: AppPallete.whiteColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500),
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Inference by Roboflow:',
+                        style: TextStyle(
+                            color: AppPallete.whiteColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500),
+                      ),
+                      SingleChildScrollView(
+                        child: SizedBox(
+                          height: 150,
+                          width: double.maxFinite,
+                          child: ListView.builder(
+                            itemCount: bag.length,
+                            itemBuilder: (context, index) {
+                              String keyModel = bag.keys.toList()[index];
+                              Prediction result = predicitonsList.firstWhere(
+                                (element) => element.classObj == keyModel,
+                              );
+                              int repeated = bag[keyModel];
+                              return MyCardTile(
+                                  repeated: repeated, result: result);
+                            },
+                          ),
+                        ),
+                      )
+                    ],
                   )
                 : const SizedBox.shrink()
           ],

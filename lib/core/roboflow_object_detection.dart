@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names, no_leading_underscores_for_local_identifiers
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -8,11 +10,11 @@ Future<List<Prediction>> detectObjects(File image, Map sizeImage) async {
   Uint8List imageBytes = File(image.path).readAsBytesSync();
   String base64Image = base64Encode(imageBytes);
 
-  final api_key = "s3Peoept4Syxx0LkzUba";
-  final modelEndpoint = 'hard-hat-sample-sxbw4/1';
+  const api_key = "s3Peoept4Syxx0LkzUba";
+  const modelEndpoint = 'hard-hat-sample-sxbw4/1';
   try {
     {
-      final url = "https://detect.roboflow.com/$modelEndpoint?api_key=$api_key";
+      const url = "https://detect.roboflow.com/$modelEndpoint?api_key=$api_key";
 
       final response = await http.post(
         Uri.parse(url),
